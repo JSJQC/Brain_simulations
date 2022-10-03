@@ -9,11 +9,12 @@ From geeksforgeeks
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import colors
 import matplotlib.animation as animation
 
 ON = 70
 OFF = 0
-REFR = 4
+REFR = 2
 vals = [ON, OFF]
 
 def random_impulse_layer(N):
@@ -30,16 +31,12 @@ def initial_ticks(N):
     
     return np.full((N, N), 0)
 
-def example_impulse_layer(empty_layer):
+def example_control_layer(empty_layer):
     
     c = empty_layer.copy()
     
     c[10, 3] = ON
     c[10, 7] = ON
-    
-    print ()
-    print (c)
-    print ()
     
     return c
 
@@ -48,7 +45,7 @@ def example_type_layer():
     ## An 11 x 11 example grid, as drawn on the planning sheet
     
     NERVE = 40
-    TWO_JUNCTION = 100
+    TWO_JUNCTION = 120
     SHEATH = 999
 
     grid = np.array([[SHEATH, SHEATH, SHEATH, SHEATH, SHEATH, NERVE, SHEATH, SHEATH, SHEATH, SHEATH, SHEATH],
@@ -63,14 +60,10 @@ def example_type_layer():
             [SHEATH, SHEATH, SHEATH, NERVE, SHEATH, SHEATH, SHEATH, NERVE, SHEATH, SHEATH, SHEATH],
             [SHEATH, SHEATH, SHEATH, NERVE, SHEATH, SHEATH, SHEATH, NERVE, SHEATH, SHEATH, SHEATH]])
     
-    print ()
-    print (grid)
-    print ()
-    
     return grid
     
     
-def update(frameNum, img, impulse_layer, tick_layer, type_layer, N):
+def update(frameNum, img, impulse_layer, tick_layer, type_layer, control_layer, N):
     
     '''
     impulse_layer: carries the impulse values (the original "grid")
@@ -90,19 +83,22 @@ def update(frameNum, img, impulse_layer, tick_layer, type_layer, N):
                          impulse_layer[(i + 1) % N, (j - 1) % N ] + impulse_layer[(i + 1) % N, (j +1 ) % N]))
             
             ## Conway's rules
-            
-            if impulse_layer[i, j] == ON: # cells currently only hold charge for one tick
-                new_impulse[i, j] = OFF
-                new_tick[i, j] = REFR
-                    
-            else:
-                if tick_layer[i, j] == 0:
-                    if total >= type_layer[i, j]:
-                        new_impulse[i, j] = ON
+            if control_layer[i, j] == OFF:
+                if impulse_layer[i, j] == ON: # cells currently only hold charge for one tick
+                    new_impulse[i, j] = OFF
+                    new_tick[i, j] = REFR
+                        
                 else:
-                    new_tick[i, j] = tick_layer[i, j] - 1
+                    if tick_layer[i, j] == 0:
+                        if total >= type_layer[i, j]:
+                            new_impulse[i, j] = ON
+                    else:
+                        new_tick[i, j] = tick_layer[i, j] - 1
+                        
+            else:
+                new_impulse[i, j] = ON
                     
-    img.set_data(new_impulse)
+    img.set_data(new_impulse + type_layer)
     impulse_layer[:] = new_impulse[:]
     tick_layer[:] = new_tick[:]
     return img,
@@ -113,22 +109,27 @@ def main(N, movfile, interval):
     updateInterval = int(interval)
 
     empty_layer = empty_impulse_layer(N)
-    impulse_layer = example_impulse_layer(empty_layer)
+    impulse_layer = empty_layer
+    control_layer = example_control_layer(empty_layer)
     type_layer = example_type_layer()
     tick_layer = initial_ticks(N)
         
     ## Animation
     
     fig, ax = plt.subplots()
-    img = ax.imshow(impulse_layer, cmap = 'gray', interpolation = 'nearest')
+    #plt.gcf().text(0.9, 0.9, 'text', fontsize = 20)
+    cmp = colors.ListedColormap(['dimgray', 'white', 'gray', 'white', 'black', 'white'])
+    bounds = [ 0, 41, 111, 121, 191, 1000, 1071]
+    norm = colors.BoundaryNorm(bounds, cmp.N)
+    img = ax.imshow(impulse_layer + type_layer, cmap = cmp, norm = norm, interpolation = 'nearest')
     #img = ax.imshow(type_layer, interpolation = 'nearest') ## Shows the type layout
-    ani = animation.FuncAnimation(fig, update, fargs = (img, impulse_layer, tick_layer, type_layer, N, ),
-                                  frames = 10,
+    ani = animation.FuncAnimation(fig, update, fargs = (img, impulse_layer, tick_layer, type_layer, control_layer, N, ),
+                                  frames = 40,
                                   interval = updateInterval,
                                   save_count = 50)
     
     fig.set_size_inches(N, N, True)
-    ani.save(movfile, fps = 2) #, extra_args = ['-vcodec', 'libx2645'])
+    ani.save(movfile, fps = 3) #, extra_args = ['-vcodec', 'libx2645'])
         
     plt.show()
     
