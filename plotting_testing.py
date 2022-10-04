@@ -6,15 +6,18 @@ Created on Mon Oct  3 15:10:10 2022
 """
 
 import brain_function as bf
+import frog
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
 
-type_layer = bf.example_type_layer()
+boi_e = frog.Frog('example', [11, 11])
+boi_t = frog.Frog('turning', [6, 13])
+
 
 print ()
-print (type_layer)
+print (boi_t.type_layer)
 print ()
 
 fig, ax = plt.subplots()
@@ -24,12 +27,8 @@ bounds=[0, 41, 121, 1000]
 norm = colors.BoundaryNorm(bounds, cmp.N)
 
 #img = ax.imshow(type_layer, cmap = 'gray', interpolation = 'nearest')
-img = ax.imshow(type_layer, cmap = cmp, norm=norm, interpolation = 'nearest')
+img = ax.imshow(boi_t.type_layer, cmap = cmp, norm=norm, interpolation = 'nearest')
 plt.show()
-
-
-empty_layer = bf.empty_impulse_layer(11)
-impulse_layer = bf.example_impulse_layer(empty_layer)
 
 fig, ax = plt.subplots()
 
@@ -38,5 +37,5 @@ bounds=[0, 41, 111, 121, 179, 1000, 1071]
 norm = colors.BoundaryNorm(bounds, cmp.N)
 
 #img = ax.imshow(type_layer, cmap = 'gray', interpolation = 'nearest')
-img = ax.imshow(type_layer + impulse_layer, cmap = cmp, norm=norm, interpolation = 'nearest')
+img = ax.imshow(boi_t.type_layer + boi_t.impulse_layer, cmap = cmp, norm=norm, interpolation = 'nearest')
 plt.show()
