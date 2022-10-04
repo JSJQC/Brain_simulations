@@ -5,5 +5,5 @@ To implement:
   - Reading outputs
   - Some form of training; either back-propagation, or evolutionary
   - A reaction to stimulus; or some other "brain" activity
-    - Eyes need to take in position of food and calculate the relevant angles
+    - Eyes need to take in position of food and calculate the relevant angles -- Done
   - PyGame graphics of frog going for food
