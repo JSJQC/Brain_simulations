@@ -4,7 +4,6 @@ Created on Sun Sep 11 17:58:54 2022
 
 @author: jakes
 
-From geeksforgeeks
 """
 
 import numpy as np
